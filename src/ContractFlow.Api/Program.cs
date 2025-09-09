@@ -15,8 +15,10 @@ builder.Host.UseSerilog((ctx, cfg) =>
 });
 
 builder.Services.AddInfrastructurePersistence(builder.Configuration);
+builder.Services.AddMediatR(typeof(CreateContractCommand).Assembly);
+builder.Services.AddInfrastructureMessaging(builder.Configuration);
 
-builder.Services.AddMediatR(typeof(CreateContractCommand).Assembly);    
+builder.Services.AddOutboxDispatcher(builder.Configuration);
 
 var app = builder.Build();
 

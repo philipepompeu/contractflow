@@ -4,7 +4,7 @@ public sealed class SaleContract : Contract
 {
     public Guid CustomerId { get; private set; }
     protected SaleContract()
-    {         
+    {
         Type = ContractType.Sale;
     }
     
@@ -18,7 +18,7 @@ public sealed class SaleContract : Contract
             if (startDate < DateOnly.FromDateTime(DateTime.UtcNow.Date))
                 throw new InvalidOperationException("StartDate não pode ser no passado.");
 
-            return new SaleContract
+            var saleContract = new SaleContract
             {
                 Id = Guid.NewGuid(),
                 CustomerId = customerId,
@@ -27,6 +27,9 @@ public sealed class SaleContract : Contract
                 CreatedAt = now ?? DateTimeOffset.UtcNow,
                 TotalPrice = 1m
             };
+
+            saleContract.RaiseCreated();
+            return saleContract;
         }
     }
 }

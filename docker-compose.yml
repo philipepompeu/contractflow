@@ -11,5 +11,15 @@ services:
           - pg_data:/var/lib/postgresql/data
         ports:
           - "5433:5432" 
+    rabbitmq:
+      image: rabbitmq:3-management
+      container_name: contractflow-rabbitmq
+      restart: always
+      environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+      ports:
+        - "15666:15672" # UI Web do RabbitMQ      
+        - "5673:5672"
 volumes:
-  pg_data:  
+  pg_data:
