@@ -3,7 +3,7 @@ namespace ContractFlow.Domain.Models;
 public sealed class SaleContract : Contract
 {
     public Guid CustomerId { get; private set; }
-    protected SaleContract()
+    private SaleContract(Guid id): base(id)
     {
         Type = ContractType.Sale;
     }
@@ -18,9 +18,8 @@ public sealed class SaleContract : Contract
             if (startDate < DateOnly.FromDateTime(DateTime.UtcNow.Date))
                 throw new InvalidOperationException("StartDate não pode ser no passado.");
 
-            var saleContract = new SaleContract
-            {
-                Id = Guid.NewGuid(),
+            var saleContract = new SaleContract(Guid.NewGuid())
+            {                
                 CustomerId = customerId,
                 PlanId = planId,
                 StartDate = startDate,
