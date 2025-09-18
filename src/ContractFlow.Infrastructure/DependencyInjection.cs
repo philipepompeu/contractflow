@@ -1,4 +1,6 @@
+using ContractFlow.Application.Abstractions;
 using ContractFlow.Application.Contracts.Abstractions;
+using ContractFlow.Infrastructure.Messaging;
 using ContractFlow.Infrastructure.Outbox;
 using ContractFlow.Infrastructure.Persistence;
 using MassTransit;
@@ -31,6 +33,7 @@ namespace ContractFlow.Infrastructure
             });
 
             services.AddScoped<IContractWriteRepository, Repositories.ContractWriteRepository>();
+            services.AddScoped<IApprovalDocumentRepository, Repositories.ApprovalDocumentRepository>();
 
             return services;
         }
@@ -48,7 +51,11 @@ namespace ContractFlow.Infrastructure
                         h.Username(cfg["Rabbit:User"] ?? "guest");
                         h.Password(cfg["Rabbit:Pass"] ?? "guest");                        
                     });
+                    bus.ConfigureEndpoints(context);
                 });
+                
+                x.AddConsumer<ContractCreatedDomainEventConsumer>();
+                
             });
 
             return services;

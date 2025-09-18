@@ -4,7 +4,7 @@ using ContractFlow.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace ContractFlow.Application.Contracts.Handlers;
+namespace ContractFlow.Application.Handlers;
 
 public sealed class CreateContractHandler : IRequestHandler<CreateContractCommand, CreateContractResult>
 {
@@ -18,14 +18,40 @@ public sealed class CreateContractHandler : IRequestHandler<CreateContractComman
     }
 
     public async Task<CreateContractResult> Handle(CreateContractCommand cmd, CancellationToken ct)
-    {        
-        var contract = SaleContract.Factories.Create(cmd.CustomerId, cmd.PlanId, cmd.StartDate);
+    {
 
-        await _repo.AddAsync(contract, ct);
+        Contract? contract = default;
 
-        _logger.LogInformation("Contract {ContractId} created for customer {CustomerId} with plan {PlanId} starting at {StartDate}",
-            contract.Id, contract.CustomerId, contract.PlanId, contract.StartDate);
+        switch(cmd.Type)
+        {
+            case ContractType.Purchase:
 
-        return new CreateContractResult(contract.Id);
+                contract = PurchaseContract.Builder.New()
+                            .WithSupplierId(cmd.PartnerId)
+                            .WithPlanId(cmd.PlanId)
+                            .WithStartDate(cmd.StartDate)
+                            .WithTotalPrice(cmd.totalAmount)
+                            .Build();
+                            
+                await _repo.AddAsync(contract, ct);
+                break;
+            case ContractType.Sale:
+                contract = SaleContract.Factories.Create(cmd.PartnerId, cmd.PlanId, cmd.StartDate);
+                await _repo.AddAsync(contract, ct);
+                break;
+            default:
+                throw new ArgumentException("Invalid contract type.");
+        }
+        
+        if (contract is Contract)
+        {
+            _logger.LogInformation("Contract {ContractId} created with plan {PlanId} starting at {StartDate}",
+                contract.Id, contract.PlanId, contract.StartDate);
+
+            return new CreateContractResult(contract.Id);
+        }
+        else
+            throw new InvalidOperationException("Failed to create contract.");
+
     }
 }

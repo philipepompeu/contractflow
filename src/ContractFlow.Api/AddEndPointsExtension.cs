@@ -1,5 +1,6 @@
 using ContractFlow.Api.Requests;
 using ContractFlow.Application.Commands;
+using ContractFlow.Application.Queries;
 using MediatR;
 
 namespace ContractFlow.Api
@@ -16,6 +17,13 @@ namespace ContractFlow.Api
             }));
 
 
+            app.MapGet("/approvals", async (ISender sender, CancellationToken ct, int page = 1, int size = 10) =>
+            {
+                var result = await sender.Send(new GetPendingApprovalsQuery(page, size), ct);
+                
+                return Results.Ok(result);
+            });
+            
             app.MapPost("/contracts", async (
                 CreateContractRequest req,
                 ISender sender,
@@ -23,7 +31,7 @@ namespace ContractFlow.Api
             {
                 try
                 {                    
-                    var cmd = new CreateContractCommand(req.CustomerId, req.PlanId, DateOnly.FromDateTime(req.StartDate));
+                    var cmd = new CreateContractCommand(req.PartnerId, req.PlanId, DateOnly.FromDateTime(req.StartDate), req.Type, req.totalAmount);
                     var result = await sender.Send(cmd, ct);
 
                     return Results.Created($"/contracts/{result.ContractId}", result);

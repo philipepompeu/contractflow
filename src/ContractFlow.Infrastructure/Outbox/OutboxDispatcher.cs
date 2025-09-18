@@ -57,12 +57,14 @@ public sealed class OutboxDispatcher(
                 {
                     try
                     {
-                        var type = Type.GetType(msg.EventType, throwOnError: false);
+                        var type = ResolveType(msg.EventType);
                         if (type is null)
                             throw new InvalidOperationException($"Tipo não resolvido: {msg.EventType}");
 
                         var payload = JsonSerializer.Deserialize(msg.Payload, type, _json)
                                       ?? throw new InvalidOperationException("Payload inválido");
+                        
+                        _log.LogInformation("Lendo mensagem: {message}", msg.Payload);
 
                         await publisher.Publish(payload, stoppingToken);
 
@@ -95,5 +97,20 @@ public sealed class OutboxDispatcher(
         }
 
         _log.LogInformation("OutboxDispatcher finalizado.");
+    }
+    
+    private static Type? ResolveType(string typeNameOrAqn)
+    {
+        // 1) Tenta resolver direto (suporta AQN "Namespace.Tipo, Assembly, Version=...")
+        var t = Type.GetType(typeNameOrAqn, throwOnError: false);
+        if (t is not null) return t;
+
+        // 2) Se veio só FullName ou o AQN não resolveu, varre assemblies carregados
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            t = asm.GetType(typeNameOrAqn, throwOnError: false);
+            if (t is not null) return t;
+        }
+        return null;
     }
 }

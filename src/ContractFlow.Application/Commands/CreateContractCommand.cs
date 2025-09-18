@@ -1,8 +1,9 @@
+using ContractFlow.Domain.Models;
 using MediatR;
 
 namespace ContractFlow.Application.Commands;
 
-public sealed record CreateContractCommand(Guid CustomerId, Guid PlanId, DateOnly StartDate) : IRequest<CreateContractResult>
+public sealed record CreateContractCommand(Guid PartnerId, Guid PlanId, DateOnly StartDate, ContractType Type, decimal totalAmount) : IRequest<CreateContractResult>
 {    
 }
 
