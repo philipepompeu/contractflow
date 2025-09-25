@@ -4,6 +4,7 @@ using ContractFlow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Diagnostics;
 
 namespace ContractFlow.Infrastructure.Outbox;
 
@@ -42,8 +43,7 @@ public sealed class OutboxSaveChangesInterceptor : SaveChangesInterceptor
                 var eventName = type.Name;                                  // nome lógico
                 var payload = JsonSerializer.Serialize(evt, type, _json);
                 var occurred = evt.OccurredOn;
-
-                ctx.OutboxMessages.Add(OutboxMessage.Create(eventType, eventName, payload, occurred));
+                ctx.OutboxMessages.Add(OutboxMessage.Create(eventType, eventName, payload, occurred, Activity.Current?.TraceId.ToString()));
             }
 
             // muito importante: limpa os eventos do agregado (idempotência de persitência)

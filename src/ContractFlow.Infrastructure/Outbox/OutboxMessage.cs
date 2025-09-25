@@ -15,16 +15,18 @@ public sealed class OutboxMessage
     public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? ProcessedAt { get; private set; }
     public DateTimeOffset? NextAttemptAt { get; private set; }
+    public string? CorrelationId { get; private set; } 
 
     private OutboxMessage() { }
 
-    public static OutboxMessage Create(string eventType, string eventName, string payload, DateTimeOffset occurredOn)
+    public static OutboxMessage Create(string eventType, string eventName, string payload, DateTimeOffset occurredOn, string? correlationId)
         => new()
         {
             EventType = eventType,
             EventName = eventName,
             Payload = payload,
-            OccurredOn = occurredOn
+            OccurredOn = occurredOn,
+            CorrelationId = correlationId
         };
 
     // Métodos de controle (usaremos no HostedService depois)    

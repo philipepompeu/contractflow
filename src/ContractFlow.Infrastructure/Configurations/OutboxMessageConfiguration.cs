@@ -23,6 +23,7 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
         b.Property(x => x.CreatedAt).HasColumnName("created_at").IsRequired();
         b.Property(x => x.ProcessedAt).HasColumnName("processed_at");
         b.Property(x => x.NextAttemptAt).HasColumnName("next_attempt_at");
+        b.Property(x => x.CorrelationId).HasColumnName("correlation_id");
 
         b.HasIndex(x => new { x.Status, x.NextAttemptAt }).HasDatabaseName("ix_outbox_status_nextattempt");
         b.HasIndex(x => x.OccurredOn).HasDatabaseName("ix_outbox_occurred");

@@ -23,10 +23,19 @@ public class ApprovalDocumentRepository(ContractFlowDbContext db):IApprovalDocum
             .Skip((page - 1) * size)
             .Take(size)
             .Select(x => new PendingApprovalDto(x.Id, x.ContractId, x.CreatedAt))
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
         
         return (items, total);
     }
 
-    
+    public ApprovalDocument? GetById(Guid id, CancellationToken ct)
+    {
+        return db.Documents.FirstOrDefault(x => x.Id == id);
+    }
+
+    public async Task ApproveDocument(ApprovalDocument document, CancellationToken ct)
+    {
+        document.Approve();
+        await db.SaveChangesAsync(ct);
+    }
 }

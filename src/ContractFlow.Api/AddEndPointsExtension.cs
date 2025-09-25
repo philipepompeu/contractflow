@@ -2,6 +2,7 @@ using ContractFlow.Api.Requests;
 using ContractFlow.Application.Commands;
 using ContractFlow.Application.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ContractFlow.Api
 {
@@ -17,9 +18,19 @@ namespace ContractFlow.Api
             }));
 
 
-            app.MapGet("/approvals", async (ISender sender, CancellationToken ct, int page = 1, int size = 10) =>
+            //app.MapGroup("/approvals").MapGet("/")
+            var group = app.MapGroup("/approvals");
+                
+                
+            group.MapGet("/", async (ISender sender, CancellationToken ct, int page = 1, int size = 10) =>
             {
                 var result = await sender.Send(new GetPendingApprovalsQuery(page, size), ct);
+                
+                return Results.Ok(result);
+            });
+            group.MapPut("/{id:guid}", async (ISender sender, CancellationToken ct, [FromRoute] Guid id) =>
+            {
+                var result = await sender.Send(new ApproveDocumentCommand(id), ct);
                 
                 return Results.Ok(result);
             });

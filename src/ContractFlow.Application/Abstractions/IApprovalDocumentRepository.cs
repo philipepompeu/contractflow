@@ -7,4 +7,8 @@ public interface IApprovalDocumentRepository
 {
     Task AddAsync(ApprovalDocument document, CancellationToken ct);
     Task<(IReadOnlyList<PendingApprovalDto> items, int total)> GetPendingDocuments(int page, int size,CancellationToken ct);
+    
+    ApprovalDocument? GetById(Guid id, CancellationToken ct);
+    Task ApproveDocument(ApprovalDocument document, CancellationToken ct);
+    
 }

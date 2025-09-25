@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ public sealed class OutboxDispatcher(
     private readonly ILogger<OutboxDispatcher> _log = log;
 
     private static readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web);
+    private static readonly ActivitySource Source = new("ContractFlow.Outbox");
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -63,13 +65,19 @@ public sealed class OutboxDispatcher(
 
                         var payload = JsonSerializer.Deserialize(msg.Payload, type, _json)
                                       ?? throw new InvalidOperationException("Payload inválido");
-                        
-                        _log.LogInformation("Lendo mensagem: {message}", msg.Payload);
 
-                        await publisher.Publish(payload, stoppingToken);
+                        using (Serilog.Context.LogContext.PushProperty("correlation_id", msg.CorrelationId))
+                        {
+                            _log.LogInformation("Lendo mensagem: {message}", msg.Payload);
 
-                        msg.MarkSent();
-                        _log.LogInformation("Outbox {Id} publicado ({EventName})", msg.Id, msg.EventName);
+                            await publisher.Publish(payload, sendContext =>
+                            {
+                                sendContext.Headers.Set("CorrelationId", msg.CorrelationId);
+                            },stoppingToken);
+
+                            msg.MarkSent();
+                            _log.LogInformation("Outbox {Id} publicado ({EventName})", msg.Id, msg.EventName);
+                        }
                     }
                     catch (Exception ex)
                     {
