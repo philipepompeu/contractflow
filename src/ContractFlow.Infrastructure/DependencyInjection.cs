@@ -55,7 +55,7 @@ namespace ContractFlow.Infrastructure
                 });
                 
                 x.AddConsumer<ContractCreatedDomainEventConsumer>();
-                
+                x.AddConsumer<DocumentApprovedEventConsumer>();
             });
 
             return services;

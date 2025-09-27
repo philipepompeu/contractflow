@@ -32,7 +32,7 @@ builder.Services.AddProblemDetails(options =>
         context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
     };
 });
-
+builder.Services.AddSingleton<CorrelationMiddleware>();
 
 var app = builder.Build();
 

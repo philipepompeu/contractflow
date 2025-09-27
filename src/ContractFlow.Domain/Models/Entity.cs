@@ -19,9 +19,9 @@ namespace ContractFlow.Domain.Models
 
        
 
-        public static bool operator ==(Entity<TId> left, Entity<TId> right) => Equals(left, right);
+        public static bool operator ==(Entity<TId>? left, Entity<TId>? right) => Equals(left, right);
 
-        public static bool operator !=(Entity<TId> left, Entity<TId> right) => !Equals(left, right);
+        public static bool operator !=(Entity<TId> left, Entity<TId>? right) => !Equals(left, right);
 
         public bool Equals(Entity<TId>? other) => Equals((object?)other);
         
